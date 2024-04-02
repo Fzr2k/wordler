@@ -9,8 +9,28 @@ import (
 
 func main() {
 	f.Println("Welcome to Wordler!")
-	
-	wordList := []string{"crane", "crank", "crone", "crony", "crown"}
+
+	// Read the content of the words.txt file
+	content, err := os.ReadFile("words.txt")
+	if err != nil {
+		f.Println("Error reading file:", err)
+		return
+	}
+
+	// Convert the content to a string
+	words := string(content)
+
+	// Split the content by newline to get individual words
+	filteredWords := strings.Split(words, "\n")
+
+	var wordList []string
+	for _, word := range filteredWords {
+		if len(word) == 5 {
+			wordList = append(wordList, word)
+		}
+	}
+
+	// wordList := []string{"crane", "crank", "crone", "crony", "crown"}
 
 	f.Println("Enter your correctly placed letters (Use _ for missing letters): ")
 	correctLetters := getUserInput()
@@ -21,8 +41,8 @@ func main() {
 	f.Println("Enter your exhausted letters: ")
 	exhaustedLetters := getUserInput()
 
-	filteredWords := filterWords(wordList, correctLetters, guessedLetters, exhaustedLetters)
-	f.Println("Filtered Words:", filteredWords)
+	resultingWords := filterWords(wordList, correctLetters, guessedLetters, exhaustedLetters)
+	f.Println("Filtered Words:", resultingWords)
 }
 
 func getUserInput() string {
