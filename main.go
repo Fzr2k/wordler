@@ -1,62 +1,95 @@
 package main
 
 import (
-	"bufio"
-	f "fmt"
+	"fmt"
 	"os"
+	"html/template"
+	"net/http"
 	"strings"
 )
 
-func main() {
-	f.Println("Welcome to Wordler!")
+var wordList []string
 
+func init() {
 	// Read the content of the words.txt file
 	content, err := os.ReadFile("words.txt")
 	if err != nil {
-		f.Println("Error reading file:", err)
+		fmt.Println("Error reading file:", err)
+		wordList = []string{"error"}
 		return
 	}
 
 	// Convert the content to a string
-	words := string(content)
+	allWords := string(content)
 
 	// Split the content by newline to get individual words
-	filteredWords := strings.Split(words, "\n")
+	fiveLetterWords := strings.Split(allWords, "\n")
 
-	var wordList []string
-	for _, word := range filteredWords {
+	for _, word := range fiveLetterWords {
 		if len(word) == 5 {
 			wordList = append(wordList, word)
 		}
 	}
-
-	// wordList := []string{"crane", "crank", "crone", "crony", "crown"}
-
-	f.Println("Enter your correctly placed letters (Use _ for missing letters): ")
-	correctLetters := getUserInput()
-
-	f.Println("Enter your correctly guessed (but incorrectly placed) letters (Use _ for missing letters): ")
-	guessedLetters := getUserInput()
-
-	f.Println("Enter your exhausted letters: ")
-	exhaustedLetters := getUserInput()
-
-	resultingWords := filterWords(wordList, correctLetters, guessedLetters, exhaustedLetters)
-	f.Println("Filtered Words:", resultingWords)
 }
 
-func getUserInput() string {
-	scanner := bufio.NewScanner(os.Stdin)
-	if scanner.Scan() {
-		return scanner.Text()
+func main() {
+	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/filter", filterHandler)
+
+	fmt.Println("Server is running on port 8080...")
+	http.ListenAndServe(":8080", nil)
+}
+
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	// Define HTML template
+	tmpl := `
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Word Filter</title>
+	</head>
+	<body>
+		<h1>Word Filter</h1>
+		<form action="/filter" method="post">
+			<label for="correct">Correctly placed letters:</label>
+			<input type="text" id="correct" name="correct"><br><br>
+			<label for="guessed">Guessed letters:</label>
+			<input type="text" id="guessed" name="guessed"><br><br>
+			<label for="exhausted">Exhausted letters:</label>
+			<input type="text" id="exhausted" name="exhausted"><br><br>
+			<input type="submit" value="Filter">
+		</form>
+	</body>
+	</html>
+	`
+
+	// Execute template
+	t, err := template.New("home").Parse(tmpl)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	return ""
+	t.Execute(w, nil)
 }
 
-func filterWords(words []string, correctLetters, guessedLetters, exhaustedLetters string) []string {
+func filterHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse form data
+	r.ParseForm()
+	correct := r.Form.Get("correct")
+	guessed := r.Form.Get("guessed")
+	exhausted := r.Form.Get("exhausted")
+
+	// Filter words
+	filteredWords := filterWords(correct, guessed, exhausted)
+
+	// Print filtered words as response
+	fmt.Fprintf(w, "Filtered Words: %s", strings.Join(filteredWords, ", "))
+}
+
+func filterWords(correctLetters, guessedLetters, exhaustedLetters string) []string {
 	var filteredWords []string
 
-	for _, word := range words {
+	for _, word := range wordList {
 		if strings.ContainsAny(word, exhaustedLetters) {
 			continue
 		}
