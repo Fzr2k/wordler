@@ -43,25 +43,75 @@ func main() {
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	// Define HTML template
 	tmpl := `
-	<!DOCTYPE html>
-	<html>
-	<head>
-		<title>Word Filter</title>
-	</head>
-	<body>
-		<h1>Word Filter</h1>
-		<form action="/filter" method="post">
-			<label for="correct">Correctly placed letters:</label>
-			<input type="text" id="correct" name="correct"><br><br>
-			<label for="guessed">Guessed letters:</label>
-			<input type="text" id="guessed" name="guessed"><br><br>
-			<label for="exhausted">Exhausted letters:</label>
-			<input type="text" id="exhausted" name="exhausted"><br><br>
-			<input type="submit" value="Filter">
-		</form>
-	</body>
-	</html>
-	`
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<title>Word Filter</title>
+			<style>
+				body {
+					font-family: Arial, sans-serif;
+					background-color: #f4f4f9;
+					margin: 0;
+					padding: 0;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					height: 100vh;
+				}
+				.container {
+					background: white;
+					padding: 20px;
+					border-radius: 8px;
+					box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+					width: 300px;
+					text-align: center;
+				}
+				h1 {
+					color: #333;
+				}
+				label {
+					display: block;
+					margin-top: 10px;
+					color: #555;
+				}
+				input[type="text"] {
+					width: 100%;
+					padding: 10px;
+					margin-top: 5px;
+					border: 1px solid #ccc;
+					border-radius: 4px;
+					box-sizing: border-box;
+				}
+				input[type="submit"] {
+					background-color: #4CAF50;
+					color: white;
+					padding: 10px 20px;
+					margin-top: 20px;
+					border: none;
+					border-radius: 4px;
+					cursor: pointer;
+				}
+				input[type="submit"]:hover {
+					background-color: #45a049;
+				}
+			</style>
+		</head>
+		<body>
+			<div class="container">
+				<h1>Word Filter</h1>
+				<form action="/filter" method="post">
+					<label for="correct">Correctly placed letters:</label>
+					<input type="text" id="correct" name="correct"><br>
+					<label for="guessed">Guessed letters:</label>
+					<input type="text" id="guessed" name="guessed"><br>
+					<label for="exhausted">Exhausted letters:</label>
+					<input type="text" id="exhausted" name="exhausted"><br>
+					<input type="submit" value="Filter">
+				</form>
+			</div>
+		</body>
+		</html>
+		`
 
 	// Execute template
 	t, err := template.New("home").Parse(tmpl)
